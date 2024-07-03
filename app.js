@@ -17,6 +17,14 @@ mongoose.connect(process.env.CONN_STR,{
     useUnifiedTopology:true,
 })
 
+function validateListSchema(List) {
+    const error = [];
+    if(!List.title){
+        error.push('title is required and must be a string');
+    }   
+    return error; 
+}
+
 //To filter lists 
 app.get('/lists', async(req,res)=>{
     try {
@@ -60,6 +68,11 @@ app.get('/lists/:id', async(req,res)=>{
 
 app.post('/lists', async(req,res) => {
     const { title, date, time, isCompleted} = req.body;
+    const error = validateListSchema({title});
+
+    if (error.length>0) {
+        return res.json({message:"validation failed", error})
+    }
     try {
         const newList = new List({title,date,time,isCompleted});
          const savedList = await newList.save();
